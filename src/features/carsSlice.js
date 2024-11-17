@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 // import axios from "axios";
 import axiosInstance from "../lib/axiosInstance";
+import moment from "moment";
 
 // Base URL for your API
 // const api = "http:localhost:3100";
@@ -19,17 +20,24 @@ export const addItem = createAsyncThunk("cars/addItem", async (newItem) => {
 
 export const updateItem = createAsyncThunk(
   "cars/updateItem",
-  async (updatedItem) => {
-    const response = await axiosInstance.put(
-      `/${updatedItem.id}`,
-      updatedItem
-    );
+  async (formData) => {
+    // console.log(formData, "idd");
+    const body = {
+      nama: formData?.nama,
+      merkId: formData?.merk?.id,
+      harga: formData?.harga,
+      tahun: formData?.tahun,
+      jarakTempuh: formData?.jarakTempuh,
+      efisiensiBahanBakar: formData?.efisiensiBahanBakar,
+    };
+
+    const response = await axiosInstance.put(`cars/${formData?.id}`, body);
     return response.data;
   }
 );
 
 export const deleteItem = createAsyncThunk("cars/deleteItem", async (id) => {
-  await axiosInstance.delete(`/${id}`);
+  await axiosInstance.delete(`/cars/${id}`);
   return id;
 });
 

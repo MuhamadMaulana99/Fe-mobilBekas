@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Route, Routes, Link, useLocation, useNavigate } from "react-router-dom";
+import { Route, Routes, Link, useNavigate, useLocation } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,25 +11,21 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Avatar from "@mui/material/Avatar";
-import { Home } from "./pages/Home";
 import { Divider, Menu, MenuItem } from "@mui/material";
 import { Logout } from "@mui/icons-material";
+import { Home } from "./pages/Home";
 import Master from "./pages/Master";
 import Merek from "./pages/Merek";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 export const SideBar = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const isNotFound = location.pathname === "/404";
-  console.log(location.pathname, "location.pathname");
+  const location = useLocation();
 
-  // Access the current path
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  // const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem("userToken");
@@ -51,16 +47,9 @@ export const SideBar = () => {
   };
 
   const handleLogout = () => {
-    // Add your logout logic here
-    localStorage.removeItem("userToken"); // Hapus token saat logout
+    localStorage.removeItem("token"); // Hapus token saat logout
     navigate("/login");
-    console.log("Logging out...");
-    handleClose();
   };
-  // useEffect(() => {
-  //     // Close sidebar when route changes
-  //     setIsSidebarOpen(false);
-  // }, [location]);
 
   return (
     <div>
@@ -88,8 +77,6 @@ export const SideBar = () => {
                 <Avatar sx={{ width: 40, height: 40 }}>U</Avatar>
               </IconButton>
               <Menu
-                component={Link}
-                to="/login"
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleClose}
@@ -116,7 +103,7 @@ export const SideBar = () => {
             onClose={toggleSidebar}
             variant="persistent"
             sx={{
-              width: 10,
+              width: 240,
               flexShrink: 0,
               "& .MuiDrawer-paper": {
                 width: 240,
@@ -124,17 +111,6 @@ export const SideBar = () => {
               },
             }}
           >
-            <div className="w-full flex justify-end mt-2">
-              <IconButton
-                edge="start"
-                color="primary"
-                aria-label="menu"
-                onClick={toggleSidebar}
-              >
-                <MenuIcon />
-              </IconButton>
-            </div>
-
             <Box
               sx={{
                 padding: 2,
@@ -143,7 +119,7 @@ export const SideBar = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                height: "100px", // Adjust height as needed
+                height: "100px",
               }}
             >
               <Avatar sx={{ width: 56, height: 56, marginBottom: 1 }}>U</Avatar>

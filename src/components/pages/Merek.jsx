@@ -17,6 +17,7 @@ import {
   TextField,
   TablePagination,
   DialogContentText,
+  Autocomplete,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -25,16 +26,16 @@ import {
 } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import {
-  fetchItems,
-  addItem,
-  updateItem,
-  deleteItem,
-} from "../../features/carsSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
+import {
+  addMerk,
+  deleteMerk,
+  fetchMerk,
+  updateMerk,
+} from "../../features/merkSlice";
 
 const initialData = [
   {
@@ -88,10 +89,10 @@ const initialData = [
   },
 ];
 
-const Contact = () => {
+const Merek = () => {
   const dispatch = useDispatch();
-  const { cars, loading, error } = useSelector((state) => state);
-  console.log(cars?.items, "cars");
+  const { merk, loading, error } = useSelector((state) => state);
+  // console.log(merk, "merk");
   const [data, setData] = useState(initialData);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -103,26 +104,20 @@ const Contact = () => {
     jarakTempuh: "",
     efisiensiBahanBakar: "",
   });
+  const [getData, setgetData] = useState({});
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  console.log(formData, "formData");
 
   const body = {
-    nama: formData?.nama,
-    harga: formData?.harga,
-    tahun: moment(formData?.tahun).year(),
-    jarakTempuh: formData?.jarakTempuh,
-    efisiensiBahanBakar: formData?.efisiensiBahanBakar,
+    merk: formData?.merk,
   };
 
   const handleAddOpen = () => {
     setFormData({
-      nama: "",
-      harga: "",
-      tahun: "",
-      jarakTempuh: "",
-      efisiensiBahanBakar: "",
+      merk: "",
     });
     setOpenAddDialog(true);
   };
@@ -131,16 +126,22 @@ const Contact = () => {
     setOpenAddDialog(false);
   };
   const handleAddSubmit = () => {
-    dispatch(addItem(body)).then()
+    dispatch(addMerk(body))
+      .then()
       .then(() => toast.success("Item added successfully"))
       .catch(() => toast.error("Failed to add item"));
     setData([...data, formData]);
     handleAddClose();
   };
 
-  const handleEditOpen = (index) => {
+  const handleEditOpen = (row, index) => {
+    // console.log(row, "row");
+    setgetData(row);
     setSelectedIndex(index);
-    setFormData(data[index]);
+    setFormData({
+      id: merk?.items[index]?.id,
+      merk: merk?.items[index]?.merk,
+    });
     setOpenEditDialog(true);
   };
 
@@ -149,17 +150,17 @@ const Contact = () => {
   };
 
   const handleEditSubmit = () => {
-    if (Object.values(formData).some((value) => value === "")) {
-      alert("Please fill in all fields.");
-      return;
-    }
+    dispatch(updateMerk(formData))
+      .then()
+      .then(() => toast.success("Item delete successfully"))
+      .catch(() => toast.error("Failed to add item"));
     const updatedData = [...data];
     updatedData[selectedIndex] = formData;
     setData(updatedData);
     handleEditClose();
   };
 
-  const handleDeleteOpen = (index) => {
+  const handleDeleteOpen = (row, index) => {
     setDeleteIndex(index);
     setOpenDeleteDialog(true);
   };
@@ -170,6 +171,10 @@ const Contact = () => {
 
   const handleDelete = () => {
     const newData = [...data];
+    dispatch(deleteMerk(getData?.id))
+      .then()
+      .then(() => toast.success("Item delete successfully"))
+      .catch(() => toast.error("Failed to add item"));
     newData.splice(deleteIndex, 1);
     setData(newData);
     handleDeleteClose();
@@ -192,8 +197,10 @@ const Contact = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchItems());
+    dispatch(fetchMerk());
   }, []);
+
+  const isFormValid = formData.merk !== '';
 
   return (
     <div>
@@ -217,19 +224,13 @@ const Contact = () => {
           <TableHead>
             <TableRow>
               <TableCell>No</TableCell>
-              <TableCell>Nama</TableCell>
-              <TableCell align="right">Harga (IDR)</TableCell>
-              <TableCell align="right">Tahun</TableCell>
-              <TableCell align="right">Jarak Tempuh (KM)</TableCell>
-              <TableCell align="right">
-                Efisiensi Bahan Bakar (L/100KM)
-              </TableCell>
+              <TableCell>Nama Merk</TableCell>
               <TableCell align="center">Aksi</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {cars?.items
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            {merk?.items
+              ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((row, index) => (
                 <TableRow
                   key={index}
@@ -237,27 +238,19 @@ const Contact = () => {
                 >
                   <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell component="th" scope="row">
-                    {row.nama}
+                    {row?.merk}
                   </TableCell>
-                  <TableCell align="right">
-                    {row.harga.toLocaleString("id-ID")}
-                  </TableCell>
-                  <TableCell align="right">{row.tahun}</TableCell>
-                  <TableCell align="right">
-                    {row.jarakTempuh.toLocaleString("id-ID")}
-                  </TableCell>
-                  <TableCell align="right">{row.efisiensiBahanBakar}</TableCell>
                   <TableCell align="center">
                     <IconButton
                       aria-label="edit"
-                      onClick={() => handleEditOpen(index)}
+                      onClick={() => handleEditOpen(row, index)}
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
                       aria-label="delete"
                       onClick={() =>
-                        handleDeleteOpen(page * rowsPerPage + index)
+                        handleDeleteOpen(row, page * rowsPerPage + index)
                       }
                     >
                       <DeleteIcon />
@@ -270,7 +263,7 @@ const Contact = () => {
         <TablePagination
           rowsPerPageOptions={[5]}
           component="div"
-          count={cars?.items?.length}
+          count={merk?.items?.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -291,56 +284,24 @@ const Contact = () => {
           <TextField
             autoFocus
             margin="dense"
-            name="nama"
+            name="merk"
             label="Nama"
             type="text"
             fullWidth
-            value={formData.nama}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="harga"
-            label="Harga (IDR)"
-            type="number"
-            fullWidth
-            value={formData.harga}
-            onChange={handleChange}
-          />
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              label="Select Date"
-              // openTo="year"
-              views={["year"]} // Restricts to year view
-              value={formData.tahun}
-              onChange={(newValue) =>
-                setFormData({ ...formData, tahun: newValue })
-              }
-              renderInput={(params) => <TextField {...params} />}
-            />
-          </LocalizationProvider>
-          <TextField
-            margin="dense"
-            name="jarakTempuh"
-            label="Jarak Tempuh (KM)"
-            type="number"
-            fullWidth
-            value={formData.jarakTempuh}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="efisiensiBahanBakar"
-            label="Efisiensi Bahan Bakar (L/100KM)"
-            type="number"
-            fullWidth
-            value={formData.efisiensiBahanBakar}
+            value={formData.merk}
             onChange={handleChange}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddClose}>Batal</Button>
-          <Button onClick={handleAddSubmit} color="primary">
+          <Button variant="contained" onClick={handleAddClose}>
+            Batal
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleAddSubmit}
+            color="primary"
+            disabled={!isFormValid}
+          >
             Simpan
           </Button>
         </DialogActions>
@@ -359,54 +320,31 @@ const Contact = () => {
           <TextField
             autoFocus
             margin="dense"
-            name="nama"
+            name="merk"
             label="Nama"
             type="text"
             fullWidth
-            value={formData.nama}
+            value={formData.merk}
             onChange={handleChange}
           />
-          <TextField
-            margin="dense"
-            name="harga"
-            label="Harga (IDR)"
-            type="number"
-            fullWidth
-            value={formData.harga}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="tahun"
-            label="Tahun"
-            type="number"
-            fullWidth
-            value={formData.tahun}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="jarakTempuh"
-            label="Jarak Tempuh (KM)"
-            type="number"
-            fullWidth
-            value={formData.jarakTempuh}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="efisiensiBahanBakar"
-            label="Efisiensi Bahan Bakar (L/100KM)"
-            type="number"
-            fullWidth
-            value={formData.efisiensiBahanBakar}
-            onChange={handleChange}
-          />
+          {/* <Autocomplete
+            options={merk?.items || []}
+            getOptionLabel={(option) => option.merk || ""}
+            value={formData.merk || null}
+            onChange={handleMerkChange}
+            renderInput={(params) => <TextField {...params} label="Merk" />}
+          /> */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleEditClose}>Batal</Button>
-          <Button onClick={handleEditSubmit} color="primary">
-            Simpan
+          <Button variant="contained" onClick={handleEditClose}>
+            Batal
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleEditSubmit}
+            color="primary"
+          >
+            Edit
           </Button>
         </DialogActions>
       </Dialog>
@@ -436,4 +374,4 @@ const Contact = () => {
   );
 };
 
-export default Contact;
+export default Merek;
