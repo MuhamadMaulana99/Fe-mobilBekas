@@ -260,7 +260,7 @@ const Master = () => {
       </Button>
       <TableContainer
         component={Paper}
-        sx={{ mt: 4, maxHeight: 400, overflow: "auto" }}
+        sx={{ mt: 4, maxHeight: 500, overflow: "auto" }}
       >
         <Table sx={{ minWidth: 650 }} stickyHeader aria-label="sticky table">
           <TableHead>
