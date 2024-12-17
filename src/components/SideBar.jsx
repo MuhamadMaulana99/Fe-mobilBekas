@@ -18,12 +18,15 @@ import Master from "./pages/Master";
 import Merek from "./pages/Merek";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import { getUserRole } from "./global/getUserRole";
 
 export const SideBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isNotFound = location.pathname === "/404";
-  console.log(location.pathname, "location.pathname");
+  const userRole = getUserRole();
+  // console.log(location.pathname, "location.pathname");
+  // console.log(userRole, 'userRole')
 
   // Access the current path
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -85,7 +88,7 @@ export const SideBar = () => {
                 Aplikasi Mobil Bekas
               </Typography>
               <IconButton color="inherit" onClick={handleClick}>
-                <Avatar sx={{ width: 40, height: 40 }}>U</Avatar>
+                <Avatar sx={{ width: 40, height: 40 }}>{userRole?.name?.split(" ").map(word => word.charAt(0)).join("").toUpperCase()}</Avatar>
               </IconButton>
               <Menu
                 component={Link}
@@ -146,8 +149,8 @@ export const SideBar = () => {
                 height: "100px", // Adjust height as needed
               }}
             >
-              <Avatar sx={{ width: 56, height: 56, marginBottom: 1 }}>U</Avatar>
-              <Typography variant="h6">User Name</Typography>
+              <Avatar sx={{ width: 56, height: 56, marginBottom: 1 }}>{userRole?.name?.split(" ").map(word => word.charAt(0)).join("").toUpperCase()}</Avatar>
+              <Typography variant="h6">{userRole?.name?.toUpperCase()}</Typography>
             </Box>
             <List>
               <ListItem button component={Link} to="/home" onClick={toggleSidebar}>

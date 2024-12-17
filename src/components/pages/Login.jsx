@@ -18,9 +18,9 @@ const Login = () => {
   );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const credentials = {
@@ -28,11 +28,18 @@ const Login = () => {
       password,
     };
     const result = await dispatch(loginUser(credentials));
-    console.log(result, 'result')
+    // console.log(result, 'result')
     if (result?.payload?.token) {
       navigate("/home");
+      setError(false)
     }else{
       console.log('first')
+      setError(true)
+    }
+  };
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSubmit()
     }
   };
 
@@ -53,6 +60,7 @@ const Login = () => {
           variant="outlined"
           fullWidth
           margin="normal"
+          error={error}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -62,6 +70,7 @@ const Login = () => {
           type="password"
           variant="outlined"
           fullWidth
+          error={error}
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -74,6 +83,7 @@ const Login = () => {
           fullWidth
           className="mt-4"
           disabled={loading}
+          onKeyPress={handleKeyPress} 
         >
           {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
         </Button>

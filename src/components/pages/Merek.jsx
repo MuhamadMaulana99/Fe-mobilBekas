@@ -109,7 +109,7 @@ const Merek = () => {
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  console.log(formData, "formData");
+  // console.log(formData, "formData");
 
   const body = {
     merk: formData?.merk,
@@ -245,7 +245,7 @@ const Merek = () => {
                       aria-label="edit"
                       onClick={() => handleEditOpen(row, index)}
                     >
-                      <EditIcon />
+                      <EditIcon color="primary" />
                     </IconButton>
                     <IconButton
                       aria-label="delete"
@@ -253,7 +253,7 @@ const Merek = () => {
                         handleDeleteOpen(row, page * rowsPerPage + index)
                       }
                     >
-                      <DeleteIcon />
+                      <DeleteIcon  color="error" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

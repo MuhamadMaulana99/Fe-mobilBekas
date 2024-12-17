@@ -32,7 +32,7 @@ import {
   updateItem,
   deleteItem,
 } from "../../features/carsSlice";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -121,7 +121,7 @@ const Master = () => {
     harga: formData?.harga,
     tahun: moment(formData?.tahun).year(),
     jarakTempuh: formData?.jarakTempuh,
-    efisiensiBahanBakar: formData?.efisiensiBahanBakar,
+    // efisiensiBahanBakar: formData?.efisiensiBahanBakar,
   };
 
   const handleAddOpen = () => {
@@ -141,29 +141,31 @@ const Master = () => {
   };
   const handleAddSubmit = () => {
     dispatch(addItem(body))
-    .then(() => {
-      dispatch(fetchItems());
-      toast.success("Item Add successfully");
-    })
-    .catch(() => {
-      toast.error("Failed to Add item");
-    });
+      .then(() => {
+        dispatch(fetchItems());
+        toast.success("Item Add successfully");
+      })
+      .catch(() => {
+        toast.error("Failed to Add item");
+      });
     setData([...data, formData]);
     handleAddClose();
   };
 
   const handleEditOpen = (row, index) => {
-    // console.log(row, "row");
+    const globalIndex = page * rowsPerPage + index;
+    // console.log(globalIndex, "globalIndex");
     setgetData(row);
     setSelectedIndex(index);
     setFormData({
-      id: cars?.items[index]?.id,
-      nama: cars?.items[index]?.nama,
-      merk: cars?.items[index]?.merk,
-      harga: cars?.items[index]?.harga,
-      tahun: cars?.items[index]?.tahun,
-      jarakTempuh: cars?.items[index]?.jarakTempuh,
-      efisiensiBahanBakar: cars?.items[index]?.efisiensiBahanBakar,
+      id: cars?.items[globalIndex]?.id,
+      nama: cars?.items[globalIndex]?.nama,
+      merk: cars?.items[globalIndex]?.merk,
+      harga: cars?.items[globalIndex]?.harga,
+      tahun: parseISO(cars?.items[globalIndex]?.tahun),
+      // tahun: moment(cars?.items[globalIndex]?.tahun).toDate().toString(),
+      jarakTempuh: cars?.items[globalIndex]?.jarakTempuh,
+      // efisiensiBahanBakar: cars?.items[index]?.efisiensiBahanBakar,
     });
     setOpenEditDialog(true);
   };
@@ -174,13 +176,13 @@ const Master = () => {
 
   const handleEditSubmit = () => {
     dispatch(updateItem(formData))
-    .then(() => {
-      dispatch(fetchItems());
-      toast.success("Item Edit successfully");
-    })
-    .catch(() => {
-      toast.error("Failed to Edit item");
-    });
+      .then(() => {
+        dispatch(fetchItems());
+        toast.success("Item Edit successfully");
+      })
+      .catch(() => {
+        toast.error("Failed to Edit item");
+      });
     const updatedData = [...data];
     updatedData[selectedIndex] = formData;
     setData(updatedData);
@@ -189,7 +191,7 @@ const Master = () => {
 
   const handleDeleteOpen = (row, index) => {
     setgetData(row);
-    console.log(row, 'rowww')
+    // console.log(row, "rowww");
     setDeleteIndex(index);
     setOpenDeleteDialog(true);
   };
@@ -201,13 +203,13 @@ const Master = () => {
   const handleDelete = () => {
     const newData = [...data];
     dispatch(deleteItem(getData?.id))
-    .then(() => {
-      dispatch(fetchItems());
-      toast.success("Item deleted successfully");
-    })
-    .catch(() => {
-      toast.error("Failed to delete item");
-    });
+      .then(() => {
+        dispatch(fetchItems());
+        toast.success("Item deleted successfully");
+      })
+      .catch(() => {
+        toast.error("Failed to delete item");
+      });
     newData.splice(deleteIndex, 1);
     setData(newData);
     handleDeleteClose();
@@ -238,11 +240,7 @@ const Master = () => {
   }, []);
 
   const isFormValid =
-    formData.nama &&
-    formData.harga &&
-    formData.tahun &&
-    formData.jarakTempuh &&
-    formData.efisiensiBahanBakar;
+    formData.nama && formData.harga && formData.tahun && formData.jarakTempuh;
 
   return (
     <div>
@@ -270,9 +268,9 @@ const Master = () => {
               <TableCell align="right">Harga (IDR)</TableCell>
               <TableCell align="right">Tahun</TableCell>
               <TableCell align="right">Jarak Tempuh (KM)</TableCell>
-              <TableCell align="right">
+              {/* <TableCell align="right">
                 Efisiensi Bahan Bakar (L/100KM)
-              </TableCell>
+              </TableCell> */}
               <TableCell align="center">Aksi</TableCell>
             </TableRow>
           </TableHead>
@@ -287,21 +285,24 @@ const Master = () => {
                   <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell component="th" scope="row">
                     {row.nama}
+                    {/* {console.log(row?.tahun, 'tahunn')} */}
                   </TableCell>
                   <TableCell align="right">
                     {row.harga.toLocaleString("id-ID")}
                   </TableCell>
-                  <TableCell align="right">{row.tahun}</TableCell>
+                  <TableCell align="right">
+                    {moment(row?.tahun).local().add(7, "hours").year()}
+                  </TableCell>
                   <TableCell align="right">
                     {row.jarakTempuh.toLocaleString("id-ID")}
                   </TableCell>
-                  <TableCell align="right">{row.efisiensiBahanBakar}</TableCell>
+                  {/* <TableCell align="right">{row.efisiensiBahanBakar}</TableCell> */}
                   <TableCell align="center">
                     <IconButton
                       aria-label="edit"
                       onClick={() => handleEditOpen(row, index)}
                     >
-                      <EditIcon />
+                      <EditIcon color="primary" />
                     </IconButton>
                     <IconButton
                       aria-label="delete"
@@ -309,7 +310,7 @@ const Master = () => {
                         handleDeleteOpen(row, page * rowsPerPage + index)
                       }
                     >
-                      <DeleteIcon />
+                      <DeleteIcon color="error" />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -337,56 +338,57 @@ const Master = () => {
       >
         <DialogTitle id="add-dialog-title">Tambah Data Mobil</DialogTitle>
         <DialogContent>
-          <Autocomplete
-            options={merk?.items || []}
-            getOptionLabel={(option) => option.merk || ""}
-            value={formData.merk || null}
-            onChange={handleMerkChange}
-            renderInput={(params) => <TextField {...params} label="Merk" />}
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            name="nama"
-            label="Nama"
-            type="text"
-            fullWidth
-            value={formData.nama}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="harga"
-            label="Harga (IDR)"
-            type="number"
-            fullWidth
-            value={formData.harga}
-            onChange={handleChange}
-          />
-          <div className="my-2">
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Pilih Tahun"
-                // openTo="year"
-                views={["year"]} // Restricts to year view
-                value={formData.tahun}
-                onChange={(newValue) =>
-                  setFormData({ ...formData, tahun: newValue })
-                }
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
-          </div>
-          <TextField
-            margin="dense"
-            name="jarakTempuh"
-            label="Jarak Tempuh (KM)"
-            type="number"
-            fullWidth
-            value={formData.jarakTempuh}
-            onChange={handleChange}
-          />
-          <TextField
+          <div className="p-5">
+            <Autocomplete
+              options={merk?.items || []}
+              getOptionLabel={(option) => option.merk || ""}
+              value={formData.merk || null}
+              onChange={handleMerkChange}
+              renderInput={(params) => <TextField {...params} label="Merk" />}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              name="nama"
+              label="Nama"
+              type="text"
+              fullWidth
+              value={formData.nama}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="dense"
+              name="harga"
+              label="Harga (IDR)"
+              type="number"
+              fullWidth
+              value={formData.harga}
+              onChange={handleChange}
+            />
+            <div className="my-2">
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Pilih Tahun"
+                  // openTo="year"
+                  views={["year"]} // Restricts to year view
+                  value={formData.tahun}
+                  onChange={(newValue) => {
+                    setFormData({ ...formData, tahun: newValue });
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </LocalizationProvider>
+            </div>
+            <TextField
+              margin="dense"
+              name="jarakTempuh"
+              label="Jarak Tempuh (KM)"
+              type="number"
+              fullWidth
+              value={formData.jarakTempuh}
+              onChange={handleChange}
+            />
+            {/* <TextField
             margin="dense"
             name="efisiensiBahanBakar"
             label="Efisiensi Bahan Bakar (L/100KM)"
@@ -394,7 +396,8 @@ const Master = () => {
             fullWidth
             value={formData.efisiensiBahanBakar}
             onChange={handleChange}
-          />
+            /> */}
+          </div>
         </DialogContent>
         <DialogActions>
           <Button variant="contained" onClick={handleAddClose}>
@@ -421,59 +424,62 @@ const Master = () => {
       >
         <DialogTitle id="edit-dialog-title">Edit Data Mobil</DialogTitle>
         <DialogContent>
-        <Autocomplete
-            options={merk?.items || []}
-            getOptionLabel={(option) => option.merk || ""}
-            value={formData.merk || null}
-            onChange={handleMerkChange}
-            renderInput={(params) => <TextField {...params} label="Merk" />}
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            name="nama"
-            label="Nama"
-            type="text"
-            fullWidth
-            value={formData.nama}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            name="harga"
-            label="Harga (IDR)"
-            type="number"
-            fullWidth
-            value={formData.harga}
-            onChange={handleChange}
-          />
-          <div className="my-2">
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Pilih Tahun"
-                // openTo="year"
-                views={["year"]} // Restricts to year view
-                // value={formData.tahun ? dayjs(formData.tahun, 'YYYY') : null}
-                value={formData.tahun}
-                onChange={(newValue) =>{
-                  const formattedYear = newValue ? dayjs(newValue).format("YYYY") : ""; 
-                  setFormData({ ...formData, tahun: formattedYear })
-                }
-                }
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
-          </div>
-          <TextField
-            margin="dense"
-            name="jarakTempuh"
-            label="Jarak Tempuh (KM)"
-            type="number"
-            fullWidth
-            value={formData.jarakTempuh}
-            onChange={handleChange}
-          />
-          <TextField
+          <div className="p-5">
+            <Autocomplete
+              options={merk?.items || []}
+              getOptionLabel={(option) => option.merk || ""}
+              value={formData.merk || null}
+              onChange={handleMerkChange}
+              renderInput={(params) => <TextField {...params} label="Merk" />}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              name="nama"
+              label="Nama"
+              type="text"
+              fullWidth
+              value={formData.nama}
+              onChange={handleChange}
+            />
+            <TextField
+              margin="dense"
+              name="harga"
+              label="Harga (IDR)"
+              type="number"
+              fullWidth
+              value={formData.harga}
+              onChange={handleChange}
+            />
+            <div className="my-2">
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Pilih Tahun"
+                  // openTo="year"
+                  views={["year"]} // Restricts to year view
+                  // value={formData.tahun ? dayjs(formData.tahun, 'YYYY') : null}
+                  value={formData.tahun}
+                  onChange={(newValue) => {
+                    const formattedYear = newValue
+                      ? dayjs(newValue).format("YYYY")
+                      : "";
+                    // console.log(newValue, "neeww");
+                    setFormData({ ...formData, tahun: newValue });
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </LocalizationProvider>
+            </div>
+            <TextField
+              margin="dense"
+              name="jarakTempuh"
+              label="Jarak Tempuh (KM)"
+              type="number"
+              fullWidth
+              value={formData.jarakTempuh}
+              onChange={handleChange}
+            />
+            {/* <TextField
             margin="dense"
             name="efisiensiBahanBakar"
             label="Efisiensi Bahan Bakar (L/100KM)"
@@ -481,7 +487,8 @@ const Master = () => {
             fullWidth
             value={formData.efisiensiBahanBakar}
             onChange={handleChange}
-          />
+            /> */}
+          </div>
         </DialogContent>
         <DialogActions>
           <Button variant="contained" onClick={handleEditClose}>

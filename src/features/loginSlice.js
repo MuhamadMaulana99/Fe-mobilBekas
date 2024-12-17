@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../lib/axiosInstance";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Async Thunk untuk proses login
 export const loginUser = createAsyncThunk(
@@ -12,11 +14,12 @@ export const loginUser = createAsyncThunk(
       // Simpan token atau data ke localStorage jika login berhasil
       if (data?.token) {
         localStorage.setItem("userToken", data.token);
-        localStorage.setItem("userRole", data.role || "user"); // Menyimpan role jika ada
+        localStorage.setItem("userRole", JSON.stringify(data.data)); // Menyimpan role jika ada
       }
       return data;
     } catch (error) {
       console.error("Error logging in:", error);
+      toast.error("Password atau email salah!!");
       return rejectWithValue(error.response?.data || "Invalid username or password");
     }
   }

@@ -26,7 +26,7 @@ export const updateItem = createAsyncThunk(
       nama: formData?.nama,
       merkId: formData?.merk?.id,
       harga: formData?.harga,
-      tahun: formData?.tahun,
+      tahun: moment(formData?.tahun).year(),
       jarakTempuh: formData?.jarakTempuh,
       efisiensiBahanBakar: formData?.efisiensiBahanBakar,
     };
